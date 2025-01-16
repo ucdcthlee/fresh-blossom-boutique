@@ -2,21 +2,21 @@ import ProductCard from "./ProductCard";
 
 const FEATURED_PRODUCTS = [
   {
-    id: 1,
+    id: "1",
     name: "Jasmine Rice Toner",
     price: 28.00,
     category: "Toners",
     image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=800&q=80"
   },
   {
-    id: 2,
+    id: "2",
     name: "Acne Patch",
     price: 16.00,
     category: "Treatments",
     image: "https://images.unsplash.com/photo-1567721913486-6585f069b332?auto=format&fit=crop&w=800&q=80"
   },
   {
-    id: 3,
+    id: "3",
     name: "Anti-Aging Cream",
     price: 48.00,
     category: "Moisturizers",
