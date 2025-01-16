@@ -13,8 +13,9 @@ const AdminDashboard = () => {
     queryKey: ["isAdmin", user?.id],
     queryFn: async () => {
       if (!user) return false;
-      const { data: { role } } = await supabase.auth.getUser();
-      return role === "admin";
+      const { data } = await supabase.auth.getUser();
+      const { data: claims } = await supabase.auth.getSession();
+      return claims?.session?.user.app_metadata?.role === 'admin';
     },
     enabled: !!user,
   });
