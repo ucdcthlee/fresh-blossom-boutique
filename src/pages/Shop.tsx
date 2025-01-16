@@ -2,25 +2,16 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
-import { useSearchParams } from "react-router-dom";
 
 const Shop = () => {
-  const [searchParams] = useSearchParams();
-  const category = searchParams.get("category");
-
   const { data: products, isLoading } = useQuery({
-    queryKey: ["products", category],
+    queryKey: ["products"],
     queryFn: async () => {
-      const query = supabase
+      const { data, error } = await supabase
         .from("products")
         .select("*")
         .order("created_at", { ascending: false });
-
-      if (category) {
-        query.eq("category", category);
-      }
-
-      const { data, error } = await query;
+      
       if (error) throw error;
       return data;
     },
@@ -30,9 +21,7 @@ const Shop = () => {
     <div className="min-h-screen">
       <Navbar />
       <main className="container mx-auto px-4 pt-24">
-        <h1 className="text-3xl font-display mb-8">
-          {category ? `${category}` : "All Products"}
-        </h1>
+        <h1 className="text-3xl font-display mb-8">Shop All Products</h1>
         
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

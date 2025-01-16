@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -5,9 +6,11 @@ import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
+import { Minus, Plus } from "lucide-react";
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
 
   const { data: product, isLoading } = useQuery({
@@ -23,6 +26,23 @@ const ProductDetail = () => {
       return data;
     },
   });
+
+  const handleQuantityChange = (delta: number) => {
+    setQuantity((prev) => Math.max(1, prev + delta));
+  };
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity,
+      image: product.images?.[0],
+    });
+    toast.success("Added to cart");
+  };
 
   if (isLoading) {
     return (
@@ -51,17 +71,6 @@ const ProductDetail = () => {
     );
   }
 
-  const handleAddToCart = () => {
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      quantity: 1,
-      image: product.images?.[0],
-    });
-    toast.success("Added to cart");
-  };
-
   return (
     <div>
       <Navbar />
@@ -78,6 +87,25 @@ const ProductDetail = () => {
             <h1 className="text-3xl font-display mb-2">{product.name}</h1>
             <p className="text-2xl font-display mb-4">${product.price.toFixed(2)}</p>
             <p className="text-gray-600 mb-8">{product.description}</p>
+            
+            <div className="flex items-center gap-4 mb-8">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleQuantityChange(-1)}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <span className="w-12 text-center text-lg">{quantity}</span>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleQuantityChange(1)}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            
             <Button onClick={handleAddToCart} size="lg">
               Add to Cart
             </Button>
