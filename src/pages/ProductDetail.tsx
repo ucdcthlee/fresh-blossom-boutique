@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -10,21 +10,32 @@ import { Minus, Plus } from "lucide-react";
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
 
-  const { data: product, isLoading } = useQuery({
+  // Validate UUID format
+  const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  const { data: product, isLoading, error } = useQuery({
     queryKey: ["product", id],
     queryFn: async () => {
+      if (!id || !isValidUUID.test(id)) {
+        throw new Error("Invalid product ID");
+      }
+
       const { data, error } = await supabase
         .from("products")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
+      if (!data) throw new Error("Product not found");
       return data;
     },
+    retry: false,
+    enabled: !!id,
   });
 
   const handleQuantityChange = (delta: number) => {
@@ -43,6 +54,22 @@ const ProductDetail = () => {
     });
     toast.success("Added to cart");
   };
+
+  if (error) {
+    return (
+      <div>
+        <Navbar />
+        <div className="container mx-auto px-4 pt-24">
+          <div className="text-center">
+            <h1 className="text-2xl font-display mb-4">Product Not Found</h1>
+            <Button onClick={() => navigate("/shop")}>
+              Return to Shop
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -65,7 +92,12 @@ const ProductDetail = () => {
       <div>
         <Navbar />
         <div className="container mx-auto px-4 pt-24">
-          <p>Product not found</p>
+          <div className="text-center">
+            <h1 className="text-2xl font-display mb-4">Product Not Found</h1>
+            <Button onClick={() => navigate("/shop")}>
+              Return to Shop
+            </Button>
+          </div>
         </div>
       </div>
     );
